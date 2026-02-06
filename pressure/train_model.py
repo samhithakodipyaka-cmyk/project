@@ -1,32 +1,44 @@
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 import pickle
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
-# sample dataset (same features as form)
-data = {
-    "gender": [0,1,0,1],
-    "age": [1,2,3,4],
-    "family_history": [0,1,1,1],
-    "medication": [0,1,1,1],
-    "severity": [0,1,2,2],
-    "breath": [0,1,1,1],
-    "vision": [0,1,0,1],
-    "nose": [0,0,1,1],
-    "systolic": [1,2,3,3],
-    "diastolic": [1,2,2,2],
-    "diet": [1,0,0,0],
-    "target": [0,1,2,3]
-}
+# Load dataset
+df = pd.read_csv("hypertension.csv")
 
-df = pd.DataFrame(data)
+# FINAL 8 FEATURES
+X = df[
+    [
+        "gender",
+        "age",
+        "systolic",
+        "diastolic",
+        "family_history",
+        "medication",
+        "smoking",
+        "exercise"
+    ]
+]
 
-X = df.drop("target", axis=1)
-y = df["target"]
+y = df["hypertension_stage"]
 
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train model
 model = LogisticRegression(max_iter=1000)
-model.fit(X, y)
+model.fit(X_train, y_train)
 
-pickle.dump(model, open("logreg_model.pkl", "wb"))
+# Accuracy
+accuracy = accuracy_score(y_test, model.predict(X_test))
 
-print("Model saved successfully!")
+# SAVE MODEL (AUTO-CREATES FILE)
+with open("logreg_model.pkl", "wb") as f:
+    pickle.dump(model, f)
+
+print("✅ Model trained successfully")
+print("📦 Saved as logreg_model.pkl")
+print("🎯 Accuracy:", accuracy)
